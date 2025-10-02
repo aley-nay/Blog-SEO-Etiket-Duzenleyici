@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Etiket ve URL Oluşturucu</title>
+<style>
+    body { font-family: Arial; padding: 20px; }
+    textarea { width: 100%; height: 100px; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<h2>Metinleri buraya girin (her satır ayrı metin)</h2>
+<textarea id="inputText"></textarea>
+<br>
+<label>Blog Resim Başlığı (URL) için maksimum karakter sayısı:</label>
+<input type="number" id="maxLen" value="150" style="width: 80px;">
+<br><br>
+<button onclick="convertAndJoin()">Dönüştür</button>
+
+<h2>Blog Etiket Alanı</h2>
+<textarea id="joinedResult" readonly></textarea>
+
+<h2>Blog Resim Başlığı (URL) Alanı</h2>
+<textarea id="urlResult" readonly></textarea>
+
+<script>
+function turkceToAscii(text) {
+    const chars = { 'ç':'c','ğ':'g','ı':'i','ö':'o','ş':'s','ü':'u',
+                    'Ç':'C','Ğ':'G','İ':'I','Ö':'O','Ş':'S','Ü':'U' };
+    return text.split('').map(c => chars[c] || c).join('');
+}
+
+function metinToUrl(metin) {
+    let txt = turkceToAscii(metin);
+    txt = txt.toLowerCase();
+    txt = txt.trim().replace(/\s+/g, '-'); // boşlukları -
+    txt = txt.replace(/[^a-z0-9\-]/g, ''); // sadece harf, rakam, -
+    return txt;
+}
+
+function convertAndJoin() {
+    const input = document.getElementById('inputText').value;
+    const lines = input.split('\n').filter(l => l.trim() !== '');
+    
+    // 1. Blog Etiket Alanı
+    const joined = lines.join(', ') + ',';
+    document.getElementById('joinedResult').value = joined;
+    
+    // 2. Blog Resim Başlığı (URL) Alanı
+    const maxLen = parseInt(document.getElementById('maxLen').value) || 200;
+    let urlLines = lines.map(l => metinToUrl(l));
+    let urlJoined = urlLines.join('-');
+    
+    if(urlJoined.length > maxLen) {
+        urlJoined = urlJoined.substring(0, maxLen);
+        // sondaki - ise kırp
+        if(urlJoined.endsWith('-')) urlJoined = urlJoined.slice(0, -1);
+    }
+    
+    document.getElementById('urlResult').value = urlJoined;
+}
+</script>
+
+</body>
+</html>
